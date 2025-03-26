@@ -1,16 +1,40 @@
+
 import sys
 import json
 import requests
-from google_search import perform_google_search
+from google_search import google_search
 from webpage_retriever import retrieve_webpage
 from relation_extractor import extract_relations_with_spanbert, extract_relations_with_gemini
-from result_selector import select_top_k_tuples, remove_duplicates
+from bs4 import BeautifulSoup
+import spacy
+
 RELATION_TYPES = {
     1: "per:schools_attended",
     2: "per:employee_of",
     3: "per:cities_of_residence",
     4: "org:top_members/employees"
 }
+nlp = spacy.load("en_core_web_lg")
+def extract_sentences_and_entities(text):
+    sentences = []
+    doc = nlp(text)
+    for sent in doc.sents:
+        sentences.append(sent.text)
+    return sentences
+
+def clean_text(html):
+    soup = BeautifulSoup(html, "html.parser")
+    return soup.get_text()
+
+def fetch_url(url):
+    try:
+        response = requests.get(url, timeout=5)
+        if response.status_code == 200:
+            return clean_text(response.text)
+    except:
+        return ""
+    return ""
+
 def main():
     # Ensure the correct number of arguments
     if len(sys.argv) != 9:
@@ -30,75 +54,108 @@ def main():
     print(f"Method = {model}\nRelation = {r}\nThreshold = {t}\nQuery = {q}")
     print(f"# of Tuples = {k}")
     print("Loading necessary libraries; This should take a minute or so ...\n")
-    final_ans=[]
-    # Step 1: Perform Google Custom Search
-    run=0
-    seen_url=[]
-    while len(final_ans)<k:
-        print('=========== Iteration: %s - Query: %s ===========' %(run, q))
-        urls = perform_google_search(api_key, engine_id, q)
-        
-        
-        extracted_tuples = set()
-        
-        for idx, url in enumerate(urls[:k]):
-            print(f"URL ({idx+1} / {len(urls)}): {url}")
-            webpage_text = retrieve_webpage(url)
-            seen_url.append(url)
-            if webpage_text:
-                #print(f"\tFetching text from url ...")
-                trimmed_text = webpage_text[:10000]  # Trimming to 10000 characters
-                print(f"\tTrimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
-                print(f"\tWebpage length (num characters): {len(trimmed_text)}")
-                
-                #print("\tAnnotating the webpage using spacy...")
-                
-                #print(f"\tExtracted {len(trimmed_text)} sentences. Processing each sentence one by one to check for presence of right pair of named entity types; if so, will run the second pipeline ...")
-                
-                # Process sentences and extract relations
-                if model == "-spanbert":
-                    relations = extract_relations_with_spanbert(trimmed_text, r, t)
-                if model == "-gemini":
-                    relations = extract_relations_with_gemini(trimmed_text, r, gemini_key,final_ans)
-            
-                if len(relations)==0:
-                    continue
 
+    if model == "-gemini":
+        seen_urls = set()
+        seen_tuples = set()
+        final_ans = []
+        used_queries = set()
 
-                if model == "-spanbert":
-                    for subj, obj, rel, conf in relations:
-                        print(RELATION_TYPES[r], rel)
-                        if conf >= t and rel == RELATION_TYPES[r]:  # Explicit threshold check
-                            print(f"\t=== Extracted Relation ===")
-                            print(f"\tRelation Type: {rel}")
-                            print(f"\tSubject: {subj} | Object: {obj} | Confidence: {conf:.2f}")
-                            print("\tAdding to set of extracted relations")
-                            extracted_tuples.add((subj, obj, rel, conf))
-                if model == "-gemini":
-                    for subj, obj in relations:
-                        
-                        final_ans.append((subj, obj))
-                    print(final_ans)
-                    q=final_ans[run][0]+ " " + final_ans[run][1]
-                    continue
+        while len(final_ans) < k:
+            print(f"\n=========== Iteration: {len(used_queries)} - Query: {q} ===========")
+            urls,seen_urls = google_search(q, api_key, engine_id, seen_urls)
+            used_queries.add(q)
+            if not urls:
+                print("No new search results found. Exiting.")
+                sys.exit(1)
 
-        # Step 2: Remove duplicates
-        #print(f"\nProcessed {len(extracted_tuples)} relations")
-        extracted_tuples = remove_duplicates(extracted_tuples)
-
-        # Step 3: Select top k tuples
-        #top_k_tuples = select_top_k_tuples(extracted_tuples, k, model)
+            for idx, url in enumerate(urls):
+                print(f"URL ({idx+1} / {len(urls)}): {url}")
+                url = url.get("URL")
+                webpage_text = retrieve_webpage(url)
         
-        # Output top k relations
+                if webpage_text:
+
+                    trimmed_text = webpage_text[:10000]
+                    print(f"        Trimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
+                    print(f"        Webpage length (num characters): {len(trimmed_text)}")
+                    sentences = extract_sentences_and_entities(trimmed_text)
+                    print(f"        I have read {len(sentences)} sentences")
+
+                try:
+                    relations = extract_relations_with_gemini(sentences, r, gemini_key)
+                    for subj, obj, conf in relations:
+                        if (subj, obj) not in seen_tuples:
+                            seen_tuples.add((subj, obj))
+                            final_ans.append((subj, obj))
+                            print(f"        Extracted Tuple: ({subj}, {obj}) with confidence {conf:.2f}")
+                except Exception as e:
+                    print(f"        Error extracting relations: {e}")
+
+            used_queries.add(q)
+
+            if len(final_ans) >= k:
+                break
+
+            if len(final_ans) > len(used_queries):
+                q = list(seen_tuples - used_queries)[0][0] + " " + list(seen_tuples - used_queries)[0][1]
+            else:
+                break
+
         print("\nTop Relations:")
-        for tuple in extracted_tuples:
-            print(f"({tuple[0]}, {tuple[1]}, {tuple[2]}, {tuple[3]})")
-        for each in final_ans:
-            final_ans.append(each)
+        for subj, obj in final_ans[:k]:
+            print(f"\t({subj}, {obj})")
 
 
-        q = extracted_tuples[0][0] + " " + extracted_tuples[0][1]
-        run+=1
+    if model == "-spanbert":
+        final_ans=dict()
+        run=0
+        seen_urls=set() 
+        seen_query=set()
+        while len(final_ans)<k:
+            print('=========== Iteration: %s - Query: %s ===========' %(run, q))
+       
+            urls,seen_urls = google_search(q, api_key, engine_id, seen_urls)
+            seen_query.add(q)
+            if not urls:
+                q = ""
+                for key, value in final_ans.items(): 
+                    q = key[0] + " " + key[1]
+                    if q not in seen_query:
+                        break   
+                    q = ""  
+                continue
+                
+
+            for idx, url in enumerate(urls):
+                print(f"URL ({idx+1} / {len(urls)}): {url}")
+                url = url.get("URL")
+                webpage_text = retrieve_webpage(url)
+        
+                if webpage_text:
+                    #print(f"\tFetching text from url ...")
+                    trimmed_text = webpage_text[:10000]  # Trimming to 10000 characters
+                    print(f"\tTrimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
+                    print(f"\tWebpage length (num characters): {len(trimmed_text)}")
+                    
+                    if model == "-spanbert":
+                        final_ans = extract_relations_with_spanbert(trimmed_text, t, final_ans, r)
+                        if len(final_ans)==0:
+                            continue
+
+                        final_ans = dict(sorted(final_ans.items(), key=lambda item: item[1][0], reverse=True))
+
+                        # Output top k relations
+                        q = ""
+                        print("\nTop Relations:")
+
+                        for index, (key, value) in enumerate(final_ans.items()):
+                            print(f"({key[0]}, {key[1]}, {key[2]}, {value[0]})")
+                            if len(q)==0:
+                                q = key[0] + " " + key[1]
+                                if q in seen_query:
+                                    q = ""
+            run+=1
 
 if __name__ == '__main__':
     main()
