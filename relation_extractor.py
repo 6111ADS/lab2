@@ -7,6 +7,7 @@ import os
 import google.generativeai as genai
 import time
 from google import genai
+import re
 
 
 # Load spaCy model
@@ -17,6 +18,7 @@ SPANBERT_PATH = "./pretrained_spanbert"
 spanbert = SpanBERT(SPANBERT_PATH)
 assert os.path.exists(SPANBERT_PATH), "SpanBERT model path does not exist!"
 # Mapping relation types
+entities_of_interest = ["ORGANIZATION", "PERSON", "LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]
 RELATION_TYPES = {
     1: "per:schools_attended",
     2: "per:employee_of",
@@ -24,93 +26,99 @@ RELATION_TYPES = {
     4: "org:top_members/employees"
 }
 
-def extract_relations_with_spanbert(text, relation_type, threshold=0.5):
+
+def extract_relations_with_spanbert(text, t,final_ans, relation_type):
     if relation_type not in RELATION_TYPES:
         raise ValueError("Invalid relation type. Choose from 1-4.")
     
-    entities_of_interest = ["ORGANIZATION", "PERSON", "LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]
     doc = nlp(text)  
-    res=[]
-   
-    for sentence in doc.sents:  
+    total = 0
+    se_count = 0
+    for s in doc.sents:
+        total = total + 1
+    print("\tExtracted ", total, " sentences. Processing each sentence one by one to check for presence of right pair of named entity types; if so, will run the second pipeline ...")
+    for sentence in doc.sents: 
+        
+        se_count = se_count + 1
+        if int(se_count) % 5 == 0:
+            print('\tProcessed ' + str(se_count) + '/' + str(total) + ' sentences')
+        relation_preds=[]
         ents = get_entities(sentence, entities_of_interest)
         candidate_pairs = []
         sentence_entity_pairs = create_entity_pairs(sentence, entities_of_interest)
         for ep in sentence_entity_pairs:
-            if ep[1][1] == 'PERSON' and ep[2][1] == 'ORGANIZATION':
+            
+            if (relation_type==1 or relation_type==2 ) and ep[1][1] == 'PERSON' and ep[2][1] == 'ORGANIZATION':
                 candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]})  
-            if ep[2][1] == 'PERSON' and ep[1][1] == 'ORGANIZATION':
+            if relation_type==4 and ep[2][1] == 'PERSON' and ep[1][1] == 'ORGANIZATION':
+     
                 candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]})
-            if ep[1][1] == 'PERSON' and ep[2][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]:
+            if relation_type==3 and ep[1][1] == 'PERSON' and ep[2][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]:
                 candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]}) 
-
-        candidate_pairs = [p for p in candidate_pairs if p["subj"][1] in ["PERSON", "ORGANIZATION"]]
-        candidate_pairs = [p for p in candidate_pairs if p["obj"][1] in ["ORGANIZATION", "PERSON", "LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]]
-        
+      
         if len(candidate_pairs) == 0:
             continue
         
         relation_preds = spanbert.predict(candidate_pairs)  
-
-        # Print Extracted Relations
-        print("\nExtracted relations:")
-        
+       
+        #dic order dict: {key: (subj, obj, rel), value = (confi, token: [])}
         for ex, pred in list(zip(candidate_pairs, relation_preds)):
-            print("\tSubject: {}\tObject: {}\tRelation: {}\tConfidence: {:.2f}".format(ex["subj"][0], ex["obj"][0], pred[0], pred[1]))
-            res.append((ex["subj"][0], ex["obj"][0], pred[0], pred[1]))
-    
-    return res
-  
-def extract_relations_with_gemini(trimmed_text, r, gemini_key, final_ans):
-    client = genai.Client(api_key=gemini_key)
-    sentences = trimmed_text.split('.')  # Splitting into sentences
-    batch_size = 5  # Send 5 sentences at a time
-    read=0
-    # Define the prompt outside the loop for efficiency
-    prompt = ("Identify relationships in the following text that match the specified relation type. "
-              "For example, the sentence: Bill Gates stepped down as chairman of Microsoft in February 2014 "
-              "and assumed a new post as technology adviser to support the newly appointed CEO Satya Nadella. "
-              "You should have the relations: ('Bill Gates', 'per:employee_of', 'Microsoft'), "
-              "('Microsoft', 'org:top_members/employees', 'Bill Gates'), "
-              "('Satya Nadella', 'per:employee_of', 'Microsoft'). "
-              f"You only need to return the relations that match {RELATION_TYPES[r]}\n\n")
-    
-    for i in range(0, len(sentences), batch_size):
-        batch = sentences[i:i + batch_size]
-        batch_prompt = prompt + "\n".join(batch)
-        read+=5
-        print("I have read ", read, "sentences")
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.0-flash", contents=batch_prompt
-            )
-            output_text = response.text
-            
-            for line in output_text.split('\n'):
-                line = line.strip()
-                #print(line)
-                if line.startswith("*"):
+            if pred[0] == RELATION_TYPES[relation_type] and pred[1]>=t :
+                key= (ex["subj"][0], ex["obj"][0], pred[0])
+                value = (pred[1],ex["tokens"])
+             
+                if key not in final_ans.keys(): 
+                    final_ans[key]=value
+                else: 
+                    if value[0] > final_ans[key][0]:
+                        final_ans[key]=value
+        
+        for index, (key, value) in enumerate(final_ans.items()):
+            print(f"\t=== Extracted Relation ===")
+            print(f"\tInput Token: {value[1]}")
+            print(f"\tRelation Type: {key[1]}")
+            print(f"\tSubject: {key[0]} | Object: {key[2]} | Confidence: {value[0]}")
+            print()
 
-                    start = line.find("(") + 1
-                    end = line.find(")")
-                    relation_content = line[start:end]
-                    parts = relation_content.split(",")
-                    
-                    if len(parts) == 3:
-                        subj = parts[0].strip().strip("'")
-                        obj = parts[2].strip().strip("'")
-                        if (subj, obj) not in final_ans:
-                            
-                            final_ans.append((subj, obj))
-                            for sent in batch:
-                                if subj in sent and obj in sent:
-                                    break
-        except Exception as e:
-            if 'RESOURCE_EXHAUSTED' in str(e):
-                print("Quota exceeded, waiting before retrying...")
-                time.sleep(10)  # Wait for 60 seconds before retrying
-                continue  # Retry the function
-            else:
-                print(f"Error processing batch: {e}")
-     
     return final_ans
+
+
+def extract_relations_with_gemini(sentences, relation_id, gemini_key):
+    genai.configure(api_key=gemini_key)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+
+    # Define relations for specific relations if needed
+    relation_templates = {
+        1: "per:schools_attended",
+        2: "per:employee_of",
+        3: "per:cities_of_residence",
+        4: "org:top_members/employees",
+        
+    }
+
+    relation = relation_templates.get(relation_id, "unknown")
+    extracted = []
+
+    for sent in sentences:
+        # Make prompt specific to the kind of relations we want
+        prompt = (
+            f"Extract pairs of entities (subject, object) where the subject is a person and the object is an organization "
+            f"from the following sentence. The relation should be 'works for'. Return only meaningful pairs in the format "
+            f"[(subject, object)].\n"
+            f"Sentence: {sent}\n"
+            f"Relation: works for\n"
+            f"Expected Format: [(subject, object)]"
+        )
+
+        try:
+            response = model.generate_content(prompt)
+            result = response.text.strip()
+
+            # Match tuples like ('X', 'Y') or ("X", "Y")
+            pattern = re.findall(r'\(["\'](.*?)["\'],\s*["\'](.*?)["\']\)', result)
+            for subj, obj in pattern:
+                # Clean up any additional whitespace and assign a default confidence score (1.0)
+                extracted.append((subj.strip(), obj.strip(), 1.0))
+        except Exception as e:
+            print(f"        Error calling Gemini API: {e}")
+    return extracted
