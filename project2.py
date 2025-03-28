@@ -128,6 +128,7 @@ def main():
                 
 
             for idx, url in enumerate(urls):
+                
                 print(f"URL ({idx+1} / {len(urls)}): {url}")
                 url = url.get("URL")
                 webpage_text = retrieve_webpage(url)
@@ -138,24 +139,23 @@ def main():
                     print(f"\tTrimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
                     print(f"\tWebpage length (num characters): {len(trimmed_text)}")
                     
-                    if model == "-spanbert":
-                        final_ans = extract_relations_with_spanbert(trimmed_text, t, final_ans, r)
-                        if len(final_ans)==0:
-                            continue
+                  
+                    final_ans = extract_relations_with_spanbert(trimmed_text, t, final_ans, r)
+                    if len(final_ans)==0:
+                        continue
 
-                        final_ans = dict(sorted(final_ans.items(), key=lambda item: item[1][0], reverse=True))
+                    final_ans = dict(sorted(final_ans.items(), key=lambda item: item[1][0], reverse=True))
 
-                        # Output top k relations
-                        q = ""
-                        print("\nTop Relations:")
-
-                        for index, (key, value) in enumerate(final_ans.items()):
-                            print(f"({key[0]}, {key[1]}, {key[2]}, {value[0]})")
-                            if len(q)==0:
-                                q = key[0] + " " + key[1]
-                                if q in seen_query:
-                                    q = ""
-            run+=1
-
+                    q = ""
+                    for index, (key, value) in enumerate(final_ans.items()):
+                        if len(q)==0:
+                            q = key[0] + " " + key[1]
+                            if q in seen_query:
+                                q = ""
+            run +=1 
+        print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} )")
+        for index, (key, value) in enumerate(final_ans.items()):
+            print(f"Confidence: {value[0]},     | Subject: {key[0]},      | Object: {key[1]}")
+                            
 if __name__ == '__main__':
     main()
