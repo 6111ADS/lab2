@@ -37,8 +37,9 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
     for s in doc.sents:
         total = total + 1
     print("\tExtracted ", total, " sentences. Processing each sentence one by one to check for presence of right pair of named entity types; if so, will run the second pipeline ...")
+    before=len(final_ans)
     for sentence in doc.sents: 
-        
+
         se_count = se_count + 1
         if int(se_count) % 5 == 0:
             print('\tProcessed ' + str(se_count) + '/' + str(total) + ' sentences')
@@ -47,18 +48,18 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
         candidate_pairs = []
         sentence_entity_pairs = create_entity_pairs(sentence, entities_of_interest)
         for ep in sentence_entity_pairs:
-            
-            if (relation_type==1 or relation_type==2 ) and ep[1][1] == 'PERSON' and ep[2][1] == 'ORGANIZATION':
+				
+            if (ep[1][1] == 'PERSON' and ep[2][1] == 'ORGANIZATION') or (ep[2][1] == 'PERSON' and ep[1][1] == 'ORGANIZATION'):
                 candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]})  
-            if relation_type==4 and ep[2][1] == 'PERSON' and ep[1][1] == 'ORGANIZATION':
-     
-                candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]})
-            if relation_type==3 and ep[1][1] == 'PERSON' and ep[2][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]:
-                candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]}) 
+                candidate_pairs.append({"tokens": ep[0], "subj": ep[2], "obj": ep[1]}) 
+            if (ep[1][1] == 'PERSON' and ep[2][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]) or ((ep[2][1] == 'PERSON' and ep[1][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"])) :
+                candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]})  
+                candidate_pairs.append({"tokens": ep[0], "subj": ep[2], "obj": ep[1]})
+        candidate_pairs = [p for p in candidate_pairs if p["subj"][1] in ["PERSON", "ORGANIZATION"]]
+        candidate_pairs = [p for p in candidate_pairs if p["obj"][1] in ["ORGANIZATION", "PERSON", "LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]]  
       
         if len(candidate_pairs) == 0:
             continue
-        
         relation_preds = spanbert.predict(candidate_pairs)  
        
         #dic order dict: {key: (subj, obj, rel), value = (confi, token: [])}
@@ -66,19 +67,22 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
             if pred[0] == RELATION_TYPES[relation_type] and pred[1]>=t :
                 key= (ex["subj"][0], ex["obj"][0], pred[0])
                 value = (pred[1],ex["tokens"])
-             
+                print(f"\t=== Extracted Relation ===")
+                print(f"\tInput Token: {ex["tokens"]}")
+                print(f"\tSubject: {ex["subj"][0]} | Object: {ex["obj"][0]} | Confidence: {pred[1]}")
                 if key not in final_ans.keys(): 
                     final_ans[key]=value
+                    print(f"\tAdding to set of extracted relations")
+                    print()
                 else: 
                     if value[0] > final_ans[key][0]:
                         final_ans[key]=value
-        
-        for index, (key, value) in enumerate(final_ans.items()):
-            print(f"\t=== Extracted Relation ===")
-            print(f"\tInput Token: {value[1]}")
-            print(f"\tRelation Type: {key[1]}")
-            print(f"\tSubject: {key[0]} | Object: {key[2]} | Confidence: {value[0]}")
-            print()
+                    else:
+                        print(f"\tDuplicate with lower confidence than existing record. Ignoring this.")
+                        print()
+    after=len(final_ans)  
+    print(f"\t Extracted annotations total {total} sentences")
+    print(f"\t Relations extracted from this website: {after-before} (Overall: {after})")
 
     return final_ans
 
