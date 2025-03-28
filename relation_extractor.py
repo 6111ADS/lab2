@@ -6,7 +6,7 @@ from spacy_help_functions import get_entities, create_entity_pairs, extract_rela
 import os
 import google.generativeai as genai
 import time
-from google import genai
+#from google import genai
 import re
 
 
@@ -68,8 +68,8 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
                 key= (ex["subj"][0], ex["obj"][0], pred[0])
                 value = (pred[1],ex["tokens"])
                 print(f"\t=== Extracted Relation ===")
-                print(f"\tInput Token: {ex["tokens"]}")
-                print(f"\tSubject: {ex["subj"][0]} | Object: {ex["obj"][0]} | Confidence: {pred[1]}")
+                print(f"\tInput Token: {ex['tokens']}")
+                print(f"\tSubject: {ex['subj'][0]} | Object: {ex['obj'][0]} | Confidence: {pred[1]}")
                 if key not in final_ans.keys(): 
                     final_ans[key]=value
                     print(f"\tAdding to set of extracted relations")

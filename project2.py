@@ -54,7 +54,7 @@ def main():
     print(f"Method = {model}\nRelation = {r}\nThreshold = {t}\nQuery = {q}")
     print(f"# of Tuples = {k}")
     print("Loading necessary libraries; This should take a minute or so ...\n")
-
+    run=0
     if model == "-gemini":
         seen_urls = set()
         seen_tuples = set()
@@ -109,7 +109,6 @@ def main():
 
     if model == "-spanbert":
         final_ans=dict()
-        run=0
         seen_urls=set() 
         seen_query=set()
         while len(final_ans)<k:
@@ -153,9 +152,9 @@ def main():
                             if q in seen_query:
                                 q = ""
             run +=1 
-        print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} )")
+        print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} ) =====================")
         for index, (key, value) in enumerate(final_ans.items()):
             print(f"Confidence: {value[0]},     | Subject: {key[0]},      | Object: {key[1]}")
-                            
+        print(f"\tTotal # of iterations = {run}")                  
 if __name__ == '__main__':
     main()
