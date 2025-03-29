@@ -102,12 +102,17 @@ def extract_relations_with_gemini(sentences, relation_id, gemini_key):
 
     print(f"\tExtracted {num_sentences} sentences. Prompting Gemini on each sentence ...")
 
+
     prompt_header = (
         f"Extract only the subject-object pairs for the relation type: {target_relation}.\n"
+        f"Each pair must follow the correct direction of the relation: "
+        f"return (Person, Organization) for this type.\n"
         f"For example, the sentence: Bill Gates stepped down as chairman of Microsoft in February 2014 and assumed a new post as technology adviser to support the newly appointed CEO Satya Nadella.\n"
         f"You should return:\n"
-        f"('Bill Gates', 'Microsoft')\n('Microsoft', 'Bill Gates')\n('Satya Nadella', 'Microsoft')\n"
+        f"('Bill Gates', 'Microsoft')\n"
+        f"('Satya Nadella', 'Microsoft')\n"
         f"Return only a list of (subject, object) tuples in this exact format: ('SUBJECT', 'OBJECT').\n"
+        f"Do not reverse the order.\n"
         f"If there are no valid tuples, respond with 'None'.\n"
     )
 

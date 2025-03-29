@@ -66,18 +66,8 @@ def main():
 
             urls, seen_urls = google_search(q, api_key, engine_id, seen_urls)
             if not urls:
-                new_query = None
-                for subj, obj in seen_tuples:
-                    candidate_q = subj + " " + obj
-                    if candidate_q not in used_queries:
-                        new_query = candidate_q
-                        break
-
-                if new_query:
-                    q = new_query
-                else:
-                    break 
-
+                print("No new search results found. Exiting.")
+                break
             used_queries.add(q)
 
             for idx, url in enumerate(urls):
@@ -135,7 +125,6 @@ def main():
                         break   
                     q = ""  
                 continue
-                
 
             for idx, url in enumerate(urls):
                 
