@@ -102,19 +102,43 @@ def extract_relations_with_gemini(sentences, relation_id, gemini_key):
 
     print(f"\tExtracted {num_sentences} sentences. Prompting Gemini on each sentence ...")
 
+    if relation_id == 1:
+        # per:schools_attended
+        prompt_header = (
+            f"Extract only subject-object pairs for the relation type: {target_relation}.\n"
+            f"The subject must be a person, and the object must be a school or educational institution.\n"
+            f"Return only a list of (subject, object) tuples in this exact format.\n"
+            f"If there are no valid tuples, respond with 'None'.\n"
+        )
+    elif relation_id == 2:
+        # per:employee_of
+        prompt_header = (
+            f"Extract only subject-object pairs for the relation type: {target_relation}.\n"
+            f"The subject must be a person, and the object must be a company or organization they work or worked for.\n"
+            f"Return only a list of (subject, object) tuples in this exact format.\n"
+            f"If there are no valid tuples, respond with 'None'.\n"
+        )
+    elif relation_id == 3:
+        # per:cities_of_residence
+        prompt_header = (
+            f"Extract subject-object pairs for the relation type: {target_relation}.\n"
+            f"The subject must be a person, and the object must be a city or place where the person lives or lived.\n"
+        
+            f"Return only (subject, object) tuples in that exact format.\n"
+            f"If there are no valid tuples, respond with 'None'.\n"
+        )
+    elif relation_id == 4:
+        # org:top_members/employees
+        prompt_header = (
+            f"Extract subject-object pairs for the relation type: {target_relation}.\n"
+            f"The subject must be an organization, and the object must be a person who is or was a top member or employee.\n"
+            f"Return only (subject, object) tuples in that exact format.\n"
+            f"If there are no valid tuples, respond with 'None'.\n"
+        )
+    else:
+        raise ValueError("Invalid relation_id.")
 
-    prompt_header = (
-        f"Extract only the subject-object pairs for the relation type: {target_relation}.\n"
-        f"Each pair must follow the correct direction of the relation: "
-        f"return (Person, Organization) for this type.\n"
-        f"For example, the sentence: Bill Gates stepped down as chairman of Microsoft in February 2014 and assumed a new post as technology adviser to support the newly appointed CEO Satya Nadella.\n"
-        f"You should return:\n"
-        f"('Bill Gates', 'Microsoft')\n"
-        f"('Satya Nadella', 'Microsoft')\n"
-        f"Return only a list of (subject, object) tuples in this exact format: ('SUBJECT', 'OBJECT').\n"
-        f"Do not reverse the order.\n"
-        f"If there are no valid tuples, respond with 'None'.\n"
-    )
+
 
     for i, sentence in enumerate(sentences):
         if (i + 1) % 5 == 0 or i == 0:
@@ -143,3 +167,4 @@ def extract_relations_with_gemini(sentences, relation_id, gemini_key):
 
     print(f"\tTotal relations extracted with Gemini: {len(results)}")
     return results
+

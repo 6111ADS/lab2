@@ -60,15 +60,34 @@ def main():
         seen_tuples = set()
         final_ans = []
         used_queries = set()
+        run = 0
 
         while len(final_ans) < k:
-            print(f"\n=========== Iteration: {len(used_queries)} - Query: {q} ===========")
+            print(f"\n=========== Iteration: {run} - Query: {q} ===========")
 
             urls, seen_urls = google_search(q, api_key, engine_id, seen_urls)
+
             if not urls:
-                print("No new search results found. Exiting.")
-                break
-            used_queries.add(q)
+                print("No new search results found for this query.")
+                used_queries.add(q)  # Still mark this query as tried
+
+                # Try to generate a new query from unseen (subj, obj)
+                new_query = None
+                for subj, obj in seen_tuples:
+                    candidate_q = subj + " " + obj
+                    if candidate_q not in used_queries:
+                        new_query = candidate_q
+                        break
+
+                if new_query:
+                    q = new_query
+                    run += 1
+                    continue
+                else:
+                    print("No more new queries to try. Exiting.")
+                    break
+
+            used_queries.add(q)  # Only added here if URLs were successfully retrieved
 
             for idx, url in enumerate(urls):
                 print(f"URL ({idx+1} / {len(urls)}): {url}")
@@ -90,23 +109,28 @@ def main():
                     except Exception as e:
                         print(f"        Error extracting relations: {e}")
 
-            # Try to create a new query from unseen (subj, obj) pairs
-            new_query = None
-            for subj, obj in seen_tuples:
-                candidate_q = subj + " " + obj
-                if candidate_q not in used_queries:
-                    new_query = candidate_q
+            # Try to generate a new query if we still need more tuples
+            if len(final_ans) < k:
+                new_query = None
+                for subj, obj in seen_tuples:
+                    candidate_q = subj + " " + obj
+                    if candidate_q not in used_queries:
+                        new_query = candidate_q
+                        break
+
+                if new_query:
+                    q = new_query
+                else:
+                    print("No more new queries to try. Exiting.")
                     break
 
-            if new_query:
-                q = new_query
-            else:
-                break  # No new query to try
+            run += 1  # Count every iteration
 
         print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} ) =====================")
         for subj, obj in final_ans:
             print(f"Subject: {subj},      | Object: {obj}")
-        print(f"\tTotal # of iterations = {len(used_queries)}")
+        print(f"\tTotal # of iterations = {run}")
+   
 
     if model == "-spanbert":
         final_ans=dict()

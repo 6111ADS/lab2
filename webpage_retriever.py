@@ -13,28 +13,34 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+def replace_sentence_ends(text):
+    """Replaces sentence ending punctuation with commas."""
+    text = re.sub(r'(?<=[.!?])\s+', ', ', text)
+    return text
+
 def retrieve_webpage(url):
     try:
         response = requests.get(url, timeout=10)
-        response.raise_for_status()  
+        response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
 
         for script in soup(['script', 'style', 'img', 'footer', 'header', 'nav', 'aside', 'form', 'svg', 'button', 'input', 'select', 'textarea']):
             script.decompose()
 
-        text_elements = [p.get_text() for p in soup.find_all(text=True)]
-        text = ' '.join(text_elements)
-        text = remove_backslash(text)
-        text = clean_text(text)
+        paragraphs = [p.get_text() for p in soup.find_all('p')]
+        combined_text = ""
+        for paragraph in paragraphs:
+            cleaned_paragraph = clean_text(remove_backslash(paragraph))
+            if cleaned_paragraph:
+                combined_text += cleaned_paragraph + " "
 
-        return text
+        combined_text = replace_sentence_ends(combined_text.strip())
+        return combined_text
 
     except requests.exceptions.RequestException:
-        return '' 
+        return ''
     except Exception:
-        return ''  
-
-
+        return ''
 '''
 import requests
 from bs4 import BeautifulSoup
@@ -71,6 +77,7 @@ def retrieve_webpage(url):
         return '' 
     except Exception:
         return ''  
-    
+
 
 '''
+
