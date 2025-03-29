@@ -49,7 +49,7 @@ def main():
     t = float(sys.argv[6])  
     q = sys.argv[7]  
     k = int(sys.argv[8])  
-
+    
     print(f"Parameters:\nClient key = {api_key}\nEngine key = {engine_id}\nGemini key = {gemini_key}")
     print(f"Method = {model}\nRelation = {r}\nThreshold = {t}\nQuery = {q}")
     print(f"# of Tuples = {k}")
@@ -63,48 +63,60 @@ def main():
 
         while len(final_ans) < k:
             print(f"\n=========== Iteration: {len(used_queries)} - Query: {q} ===========")
-            urls,seen_urls = google_search(q, api_key, engine_id, seen_urls)
-            used_queries.add(q)
+
+            urls, seen_urls = google_search(q, api_key, engine_id, seen_urls)
             if not urls:
-                print("No new search results found. Exiting.")
-                sys.exit(1)
+                new_query = None
+                for subj, obj in seen_tuples:
+                    candidate_q = subj + " " + obj
+                    if candidate_q not in used_queries:
+                        new_query = candidate_q
+                        break
+
+                if new_query:
+                    q = new_query
+                else:
+                    break 
+
+            used_queries.add(q)
 
             for idx, url in enumerate(urls):
                 print(f"URL ({idx+1} / {len(urls)}): {url}")
                 url = url.get("URL")
                 webpage_text = retrieve_webpage(url)
-        
-                if webpage_text:
 
+                if webpage_text:
                     trimmed_text = webpage_text[:10000]
                     print(f"        Trimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
                     print(f"        Webpage length (num characters): {len(trimmed_text)}")
                     sentences = extract_sentences_and_entities(trimmed_text)
 
-                try:
-                    relations = extract_relations_with_gemini(sentences, r, gemini_key)
-                    for subj, obj in relations:
-                        if (subj, obj) not in seen_tuples:
-                            seen_tuples.add((subj, obj))
-                            final_ans.append((subj, obj))
-                            print(f"        Extracted Tuple: ({subj}, {obj})")
-                except Exception as e:
-                    print(f"        Error extracting relations: {e}")
+                    try:
+                        relations = extract_relations_with_gemini(sentences, r, gemini_key)
+                        for subj, obj in relations:
+                            if (subj, obj) not in seen_tuples:
+                                seen_tuples.add((subj, obj))
+                                final_ans.append((subj, obj))
+                    except Exception as e:
+                        print(f"        Error extracting relations: {e}")
 
-            used_queries.add(q)
+            # Try to create a new query from unseen (subj, obj) pairs
+            new_query = None
+            for subj, obj in seen_tuples:
+                candidate_q = subj + " " + obj
+                if candidate_q not in used_queries:
+                    new_query = candidate_q
+                    break
 
-            if len(final_ans) >= k:
-                break
-
-            if len(final_ans) > len(used_queries):
-                q = list(seen_tuples - used_queries)[0][0] + " " + list(seen_tuples - used_queries)[0][1]
+            if new_query:
+                q = new_query
             else:
-                break
+                break  # No new query to try
 
         print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} ) =====================")
         for subj, obj in final_ans:
             print(f"Subject: {subj},      | Object: {obj}")
-        print(f"\tTotal # of iterations = {len(used_queries)}") 
+        print(f"\tTotal # of iterations = {len(used_queries)}")
 
     if model == "-spanbert":
         final_ans=dict()
