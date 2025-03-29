@@ -1,0 +1,169 @@
+Loading pre-trained spanBERT from ./pretrained_spanbert
+Parameters:
+Client key = AIzaSyDVOL7U2Y8JCK9UZmDspKzHDxV8SNIo6XQ
+Engine key = 27b7234633e834677
+Gemini key = AIzaSyBCzRutWIyKtOHU7U9o0kSecLynt-8wLm0
+Method = -gemini
+Relation = 2
+Threshold = 0.7
+Query = bill gates microsoft
+# of Tuples = 10
+Loading necessary libraries; This should take a minute or so ...
+
+
+=========== Iteration: 1 - Query: bill gates microsoft ===========
+URL (1 / 10): {'URL': 'https://en.wikipedia.org/wiki/Bill_Gates'}
+        Trimming webpage content from 143460 to 10000 characters
+        Webpage length (num characters): 10000
+	Extracted  76  sentences. Prompting Gemini on each sentence ...
+	Target relation type: per:employee_of
+	Processed 5/76 sentences
+	=== Extracted Relation ===
+	Input Sentence: Occupations Businessman philanthropist computer programmer writer Years active 1972–present Known for Pioneer of the personal computer revolution with Paul Allen Co-founding of Microsoft and Gates Foundation Title See list Chair of the Gates Foundation Chairman and founder of Cascade Investment Chairman and founder of Branded Entertainment Network Chairman and co-founder of TerraPower Founder of Breakthrough Energy Founder of Gates Ventures Technology advisor of Microsoft Spouse Melinda French ( m. 1994; div. 2021)
+	Subject: Chair of the Gates Foundation | Object: Gates Foundation
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Occupations Businessman philanthropist computer programmer writer Years active 1972–present Known for Pioneer of the personal computer revolution with Paul Allen Co-founding of Microsoft and Gates Foundation Title See list Chair of the Gates Foundation Chairman and founder of Cascade Investment Chairman and founder of Branded Entertainment Network Chairman and co-founder of TerraPower Founder of Breakthrough Energy Founder of Gates Ventures Technology advisor of Microsoft Spouse Melinda French ( m. 1994; div. 2021)
+	Subject: Chairman and founder of Cascade Investment | Object: Cascade Investment
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Occupations Businessman philanthropist computer programmer writer Years active 1972–present Known for Pioneer of the personal computer revolution with Paul Allen Co-founding of Microsoft and Gates Foundation Title See list Chair of the Gates Foundation Chairman and founder of Cascade Investment Chairman and founder of Branded Entertainment Network Chairman and co-founder of TerraPower Founder of Breakthrough Energy Founder of Gates Ventures Technology advisor of Microsoft Spouse Melinda French ( m. 1994; div. 2021)
+	Subject: Technology advisor of Microsoft | Object: Microsoft
+	Adding to set of extracted relations
+
+	Processed 10/76 sentences
+	=== Extracted Relation ===
+	Input Sentence: A pioneer of the microcomputer revolution of the 1970s and 1980s, he co-founded the software company Microsoft in 1975 with his childhood friend Paul Allen .
+	Subject: Paul Allen | Object: Microsoft
+	Adding to set of extracted relations
+
+	Processed 15/76 sentences
+	=== Extracted Relation ===
+	Input Sentence: He enrolled at Harvard College in the fall of 1973 but dropped out after two years when he and Allen co-founded Microsoft.
+	Subject: He | Object: Harvard College
+	Adding to set of extracted relations
+
+	Processed 20/76 sentences
+	=== Extracted Relation ===
+	Input Sentence: Over time, he has reduced his role at Microsoft to focus on his work at the Bill & Melinda Gates Foundation , the world's largest private charitable organization, which he and his then-wife Melinda established and co-chaired in 2000.
+	Subject: he | Object: Microsoft
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Over time, he has reduced his role at Microsoft to focus on his work at the Bill & Melinda Gates Foundation , the world's largest private charitable organization, which he and his then-wife Melinda established and co-chaired in 2000.
+	Subject: he | Object: Bill & Melinda Gates Foundation
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Gates is founder and chairman of several other companies, including BEN , Cascade Investment , TerraPower , Gates Ventures , and Breakthrough Energy .
+	Subject: Gates | Object: BEN
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Gates is founder and chairman of several other companies, including BEN , Cascade Investment , TerraPower , Gates Ventures , and Breakthrough Energy .
+	Subject: Gates | Object: Cascade Investment
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Gates is founder and chairman of several other companies, including BEN , Cascade Investment , TerraPower , Gates Ventures , and Breakthrough Energy .
+	Subject: Gates | Object: TerraPower
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Gates is founder and chairman of several other companies, including BEN , Cascade Investment , TerraPower , Gates Ventures , and Breakthrough Energy .
+	Subject: Gates | Object: Gates Ventures
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Gates is founder and chairman of several other companies, including BEN , Cascade Investment , TerraPower , Gates Ventures , and Breakthrough Energy .
+	Subject: Gates | Object: Breakthrough Energy
+	Adding to set of extracted relations
+
+	Processed 25/76 sentences
+	Processed 30/76 sentences
+	Processed 35/76 sentences
+	Processed 40/76 sentences
+	=== Extracted Relation ===
+	Input Sentence: One of these systems was a PDP-10 belonging to Computer Center Corporation (CCC) which banned Gates, Paul Allen , Ric Weiland , and Gates's best friend and first business partner Kent Evans for the summer after it caught them exploiting bugs in the operating system to obtain free computer time.
+	Subject: Gates | Object: Computer Center Corporation (CCC)
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: One of these systems was a PDP-10 belonging to Computer Center Corporation (CCC) which banned Gates, Paul Allen , Ric Weiland , and Gates's best friend and first business partner Kent Evans for the summer after it caught them exploiting bugs in the operating system to obtain free computer time.
+	Subject: Paul Allen | Object: Computer Center Corporation (CCC)
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: One of these systems was a PDP-10 belonging to Computer Center Corporation (CCC) which banned Gates, Paul Allen , Ric Weiland , and Gates's best friend and first business partner Kent Evans for the summer after it caught them exploiting bugs in the operating system to obtain free computer time.
+	Subject: Ric Weiland | Object: Computer Center Corporation (CCC)
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: One of these systems was a PDP-10 belonging to Computer Center Corporation (CCC) which banned Gates, Paul Allen , Ric Weiland , and Gates's best friend and first business partner Kent Evans for the summer after it caught them exploiting bugs in the operating system to obtain free computer time.
+	Subject: Kent Evans | Object: Computer Center Corporation (CCC)
+	Adding to set of extracted relations
+
+	Processed 45/76 sentences
+	=== Extracted Relation ===
+	Input Sentence: The following year, a Lakeside teacher enlisted Gates and Evans to automate the school's class-scheduling system, providing them computer time and royalties in return.
+	Subject: Gates | Object: school
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: The following year, a Lakeside teacher enlisted Gates and Evans to automate the school's class-scheduling system, providing them computer time and royalties in return.
+	Subject: Evans | Object: school
+	Adding to set of extracted relations
+
+	Processed 50/76 sentences
+	Processed 55/76 sentences
+	Processed 60/76 sentences
+	Processed 65/76 sentences
+	Processed 70/76 sentences
+	Processed 75/76 sentences
+	Total relations extracted with Gemini: 18
+URL (2 / 10): {'URL': 'https://www.instagram.com/thisisbillgates/?hl=en'}
+URL (3 / 10): {'URL': 'https://x.com/billgates'}
+URL (4 / 10): {'URL': 'https://www.youtube.com/billgates'}
+        Trimming webpage content from 185 to 185 characters
+        Webpage length (num characters): 185
+	Extracted  3  sentences. Prompting Gemini on each sentence ...
+	Target relation type: per:employee_of
+	Total relations extracted with Gemini: 0
+URL (5 / 10): {'URL': 'https://news.microsoft.com/2020/03/13/microsoft-announces-change-to-its-board-of-directors/'}
+URL (6 / 10): {'URL': 'https://www.gatesnotes.com/'}
+URL (7 / 10): {'URL': 'https://www.linkedin.com/in/williamhgates'}
+URL (8 / 10): {'URL': 'https://news.microsoft.com/2006/06/15/microsoft-announces-plans-for-july-2008-transition-for-bill-gates/'}
+URL (9 / 10): {'URL': 'http://www.microsoft.com/'}
+        Trimming webpage content from 248 to 248 characters
+        Webpage length (num characters): 248
+	Extracted  4  sentences. Prompting Gemini on each sentence ...
+	Target relation type: per:employee_of
+	Total relations extracted with Gemini: 0
+URL (10 / 10): {'URL': 'https://answers.microsoft.com/en-us/windows/forum/all/a-short-letter-to-bill-gates/59fdd4d0-6330-40da-9e66-fa6c29836454'}
+        Trimming webpage content from 11 to 11 characters
+        Webpage length (num characters): 11
+	Extracted  1  sentences. Prompting Gemini on each sentence ...
+	Target relation type: per:employee_of
+	Total relations extracted with Gemini: 0
+	================== ALL RELATIONS for per:employee_of ( 18 ) =====================
+Subject: Chair of the Gates Foundation,      | Object: Gates Foundation
+Subject: Chairman and founder of Cascade Investment,      | Object: Cascade Investment
+Subject: Technology advisor of Microsoft,      | Object: Microsoft
+Subject: Paul Allen,      | Object: Microsoft
+Subject: He,      | Object: Harvard College
+Subject: he,      | Object: Microsoft
+Subject: he,      | Object: Bill & Melinda Gates Foundation
+Subject: Gates,      | Object: BEN
+Subject: Gates,      | Object: Cascade Investment
+Subject: Gates,      | Object: TerraPower
+Subject: Gates,      | Object: Gates Ventures
+Subject: Gates,      | Object: Breakthrough Energy
+Subject: Gates,      | Object: Computer Center Corporation (CCC)
+Subject: Paul Allen,      | Object: Computer Center Corporation (CCC)
+Subject: Ric Weiland,      | Object: Computer Center Corporation (CCC)
+Subject: Kent Evans,      | Object: Computer Center Corporation (CCC)
+Subject: Gates,      | Object: school
+Subject: Evans,      | Object: school
+	Total # of iterations = 2
