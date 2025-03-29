@@ -60,9 +60,9 @@ def main():
         seen_tuples = set()
         final_ans = []
         used_queries = set()
-        run = 0
 
         while len(final_ans) < k:
+            run += 1  # Count every iteration
             print(f"\n=========== Iteration: {run} - Query: {q} ===========")
 
             urls, seen_urls = google_search(q, api_key, engine_id, seen_urls)
@@ -81,7 +81,6 @@ def main():
 
                 if new_query:
                     q = new_query
-                    run += 1
                     continue
                 else:
                     print("No more new queries to try. Exiting.")
@@ -98,16 +97,13 @@ def main():
                     trimmed_text = webpage_text[:10000]
                     print(f"        Trimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
                     print(f"        Webpage length (num characters): {len(trimmed_text)}")
-                    sentences = extract_sentences_and_entities(trimmed_text)
-
-                    try:
-                        relations = extract_relations_with_gemini(sentences, r, gemini_key)
-                        for subj, obj in relations:
-                            if (subj, obj) not in seen_tuples:
-                                seen_tuples.add((subj, obj))
-                                final_ans.append((subj, obj))
-                    except Exception as e:
-                        print(f"        Error extracting relations: {e}")
+                   
+                    relations = extract_relations_with_gemini(trimmed_text, r, gemini_key)
+                    for subj, obj in relations:
+                        if (subj, obj) not in seen_tuples:
+                            seen_tuples.add((subj, obj))
+                            final_ans.append((subj, obj))
+                  
 
             # Try to generate a new query if we still need more tuples
             if len(final_ans) < k:
@@ -123,14 +119,13 @@ def main():
                 else:
                     print("No more new queries to try. Exiting.")
                     break
-
-            run += 1  # Count every iteration
-
+            run +=1 
+        
         print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} ) =====================")
         for subj, obj in final_ans:
             print(f"Subject: {subj},      | Object: {obj}")
-        print(f"\tTotal # of iterations = {run}")
-   
+        print(f"\tTotal # of iterations = {run }")
+
 
     if model == "-spanbert":
         final_ans=dict()
@@ -149,6 +144,7 @@ def main():
                         break   
                     q = ""  
                 continue
+                
 
             for idx, url in enumerate(urls):
                 

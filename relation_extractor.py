@@ -25,6 +25,12 @@ RELATION_TYPES = {
     4: "org:top_members/employees"
 }
 
+Relation = {
+    1: "Schools_Attended",
+    2: "Work_For",
+    3: "Live_In",
+    4: "Top_Member_Employees"
+}
 
 def extract_relations_with_spanbert(text, t,final_ans, relation_type):
     if relation_type not in RELATION_TYPES:
@@ -47,7 +53,7 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
         candidate_pairs = []
         sentence_entity_pairs = create_entity_pairs(sentence, entities_of_interest)
         for ep in sentence_entity_pairs:
-				
+          
             if (ep[1][1] == 'PERSON' and ep[2][1] == 'ORGANIZATION') or (ep[2][1] == 'PERSON' and ep[1][1] == 'ORGANIZATION'):
                 candidate_pairs.append({"tokens": ep[0], "subj": ep[1], "obj": ep[2]})  
                 candidate_pairs.append({"tokens": ep[0], "subj": ep[2], "obj": ep[1]}) 
@@ -85,12 +91,16 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
 
     return final_ans
 
-def extract_relations_with_gemini(sentences, relation_id, gemini_key):
-    import google.generativeai as genai
+def extract_relations_with_gemini(text, relation_id, gemini_key):
 
-    if relation_id not in RELATION_TYPES:
-        raise ValueError("Invalid relation type. Choose from 1-4.")
-
+    doc = nlp(text)  
+    se_count = 0
+    total=0
+    for s in doc.sents:
+        total = total + 1
+    print("\tExtracted ", total, " sentences. Prompting Gemini on each sentence ...")
+    
+    
     target_relation = RELATION_TYPES[relation_id]
     print(f"\tTarget relation type: {target_relation}")
 
@@ -98,73 +108,67 @@ def extract_relations_with_gemini(sentences, relation_id, gemini_key):
     model = genai.GenerativeModel("gemini-2.0-flash")
 
     results = []
-    num_sentences = len(sentences)
-
-    print(f"\tExtracted {num_sentences} sentences. Prompting Gemini on each sentence ...")
 
     if relation_id == 1:
-        # per:schools_attended
-        prompt_header = (
-            f"Extract only subject-object pairs for the relation type: {target_relation}.\n"
-            f"The subject must be a person, and the object must be a school or educational institution.\n"
-            f"Return only a list of (subject, object) tuples in this exact format.\n"
-            f"If there are no valid tuples, respond with 'None'.\n"
-        )
+        example_sentence = "Jeff Bezos graduated from Princeton University."
+        example_output = "[('Jeff Bezos', 'Princeton University')]"
     elif relation_id == 2:
-        # per:employee_of
-        prompt_header = (
-            f"Extract only subject-object pairs for the relation type: {target_relation}.\n"
-            f"The subject must be a person, and the object must be a company or organization they work or worked for.\n"
-            f"Return only a list of (subject, object) tuples in this exact format.\n"
-            f"If there are no valid tuples, respond with 'None'.\n"
-        )
+        example_sentence = "Alec Radford works at OpenAI as a researcher."
+        example_output = "[('Alec Radford', 'OpenAI')]"
     elif relation_id == 3:
-        # per:cities_of_residence
-        prompt_header = (
-            f"Extract subject-object pairs for the relation type: {target_relation}.\n"
-            f"The subject must be a person, and the object must be a city or place where the person lives or lived.\n"
-        
-            f"Return only (subject, object) tuples in that exact format.\n"
-            f"If there are no valid tuples, respond with 'None'.\n"
-        )
+        example_sentence = "Mariah Carey lives in New York City."
+        example_output = "[('Mariah Carey', 'New York City')]"
     elif relation_id == 4:
-        # org:top_members/employees
-        prompt_header = (
-            f"Extract subject-object pairs for the relation type: {target_relation}.\n"
-            f"The subject must be an organization, and the object must be a person who is or was a top member or employee.\n"
-            f"Return only (subject, object) tuples in that exact format.\n"
-            f"If there are no valid tuples, respond with 'None'.\n"
-        )
+        example_sentence = "Nvidia's CEO, Jensen Huang, announced the new GPU architecture."
+        example_output = "[('Nvidia', 'Jensen Huang')]"
     else:
         raise ValueError("Invalid relation_id.")
 
+    prompt_header = (
+        f"You are a relation extraction system. In this thread, I will give you a bunch of sentences, which contain desired entities, your task is to extract the subject-object pairs for the relation type: {Relation[relation_id]} (internal name: {RELATION_TYPES[relation_id]} in spaCy).\n"
+        f"For example,"
+        f"Sentence: {example_sentence}\n"
+        f"Output: {example_output}\n\n"
+        f"Now extract subject-object pairs from the sentence below.\n"
+        f"Return only a list of (subject, object) tuples in this exact format: ('SUBJECT', 'OBJECT').\n"
+        f"If there are no valid tuples, respond with 'None'.\n"
+    )
 
+    for sentence in doc.sents: 
+        se_count = se_count + 1
+        if int(se_count) % 5 == 0:
+            print('\tProcessed ' + str(se_count) + '/' + str(total) + ' sentences')
+        takegemini=False
+        sentence_entity_pairs = create_entity_pairs(sentence, entities_of_interest)
+        for ep in sentence_entity_pairs:
+            if relation_id in [1,2,4] and ((ep[1][1] == 'PERSON' and ep[2][1] == 'ORGANIZATION') or (ep[2][1] == 'PERSON' and ep[1][1] == 'ORGANIZATION')):
+                takegemini=True
+                break
+            elif relation_id ==3 and (ep[1][1] == 'PERSON' and ep[2][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"]) or ((ep[2][1] == 'PERSON' and ep[1][1] in ["LOCATION", "CITY", "STATE_OR_PROVINCE", "COUNTRY"])) :
+                takegemini=True
+                break
 
-    for i, sentence in enumerate(sentences):
-        if (i + 1) % 5 == 0 or i == 0:
-            print(f"\tProcessed {i+1}/{num_sentences} sentences")
+        if takegemini:
+            prompt = prompt_header + f"Sentence: {sentence}"
+     
+            try:
+                response = model.generate_content(prompt)
+                reply = response.text.strip()
 
-        prompt = prompt_header + f"Sentence: {sentence}"
+                if not reply or reply.lower() == "none":
+                    continue
 
-        try:
-            response = model.generate_content(prompt)
-            reply = response.text.strip()
+                matches = re.findall(r"\('(.*?)',\s*'(.*?)'\)", reply)
+                for subj, obj in matches:
+                    if subj and obj and (subj, obj) not in results:
+                        print(f"\t=== Extracted Relation ===")
+                        print(f"\tInput Sentence: {sentence}")
+                        print(f"\tSubject: {subj} | Object: {obj}")
+                        print(f"\tAdding to set of extracted relations\n")
+                        results.append((subj, obj))
 
-            if not reply or reply.lower() == "none":
+            except Exception:
                 continue
-
-            matches = re.findall(r"\('(.*?)',\s*'(.*?)'\)", reply)
-            for subj, obj in matches:
-                if subj and obj and (subj, obj) not in results:
-                    print(f"\t=== Extracted Relation ===")
-                    print(f"\tInput Sentence: {sentence}")
-                    print(f"\tSubject: {subj} | Object: {obj}")
-                    print(f"\tAdding to set of extracted relations\n")
-                    results.append((subj, obj))
-
-        except Exception:
-            continue
 
     print(f"\tTotal relations extracted with Gemini: {len(results)}")
     return results
-
