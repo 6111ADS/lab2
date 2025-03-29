@@ -86,43 +86,68 @@ def extract_relations_with_spanbert(text, t,final_ans, relation_type):
 
     return final_ans
 
-
 def extract_relations_with_gemini(sentences, relation_id, gemini_key):
+    import google.generativeai as genai
+
+    if relation_id not in RELATION_TYPES:
+        raise ValueError("Invalid relation type. Choose from 1-4.")
+
+    target_relation = RELATION_TYPES[relation_id]
+    print(f"\tTarget relation type: {target_relation}")
+
     genai.configure(api_key=gemini_key)
     model = genai.GenerativeModel("gemini-2.0-flash")
+    '''
+    prompt = (
+            f"Extract only the subject-object pairs for the relation type: {target_relation}.\n"
+            f"For example, the sentence: Bill Gates stepped down as chairman of Microsoft in February 2014 and assumed a new post as technology adviser to support the newly appointed CEO Satya Nadella.\n"
+            f"You should return:\n"
+            f"('Bill Gates', 'Microsoft')\n('Microsoft', 'Bill Gates')\n('Satya Nadella', 'Microsoft')\n"
+            f"Return only a list of (subject, object) tuples in this exact format: ('SUBJECT', 'OBJECT').\n"
+            f"If there are no valid tuples, respond with 'None'.\n"
+    )
+    response = model.generate_content(prompt)
+    '''
+    results = []
+    num_sentences = len(sentences)
 
-    # Define relations for specific relations if needed
-    relation_templates = {
-        1: "per:schools_attended",
-        2: "per:employee_of",
-        3: "per:cities_of_residence",
-        4: "org:top_members/employees",
-        
-    }
+    print(f"\tExtracted {num_sentences} sentences. Prompting Gemini on each sentence ...")
+	
+    for i, sentence in enumerate(sentences):
+        if (i + 1) % 5 == 0 or i == 0:
+            print(f"\tProcessed {i+1}/{num_sentences} sentences")
 
-    relation = relation_templates.get(relation_id, "unknown")
-    extracted = []
-
-    for sent in sentences:
-        # Make prompt specific to the kind of relations we want
+       # prompt = ( f"Sentence: {sentence}")
         prompt = (
-            f"Extract pairs of entities (subject, object) where the subject is a person and the object is an organization "
-            f"from the following sentence. The relation should be 'works for'. Return only meaningful pairs in the format "
-            f"[(subject, object)].\n"
-            f"Sentence: {sent}\n"
-            f"Relation: works for\n"
-            f"Expected Format: [(subject, object)]"
+            f"Extract only the subject-object pairs for the relation type: {target_relation}.\n"
+            f"For example, the sentence: Bill Gates stepped down as chairman of Microsoft in February 2014 and assumed a new post as technology adviser to support the newly appointed CEO Satya Nadella.\n"
+            f"You should return:\n"
+            f"('Bill Gates', 'Microsoft')\n('Microsoft', 'Bill Gates')\n('Satya Nadella', 'Microsoft')\n"
+            f"Return only a list of (subject, object) tuples in this exact format: ('SUBJECT', 'OBJECT').\n"
+            f"If there are no valid tuples, respond with 'None'.\n"
+            f"Sentence: {sentence}"
         )
 
         try:
             response = model.generate_content(prompt)
-            result = response.text.strip()
+            reply = response.text.strip()
 
-            # Match tuples like ('X', 'Y') or ("X", "Y")
-            pattern = re.findall(r'\(["\'](.*?)["\'],\s*["\'](.*?)["\']\)', result)
-            for subj, obj in pattern:
-                # Clean up any additional whitespace and assign a default confidence score (1.0)
-                extracted.append((subj.strip(), obj.strip(), 1.0))
-        except Exception as e:
-            print(f"        Error calling Gemini API: {e}")
-    return extracted
+            if not reply or reply.lower() == "none":
+                continue
+
+            matches = re.findall(r"\('(.*?)',\s*'(.*?)'\)", reply)
+            for subj, obj in matches:
+                if subj and obj:
+                    print(f"\t=== Extracted Relation ===")
+                    print(f"\tSentence: {sentence}")
+                    print(f"\tSubject: {subj} | Object: {obj}")
+                    if (subj, obj) not in results:
+                        results.append((subj, obj))
+                        print(f"\tAdding to set of extracted relations\n")
+                    else:
+                        print(f"\tDuplicate. Ignoring this.\n")
+
+        except Exception:
+            continue
+    print(f"\tTotal relations extracted with Gemini: {len(results)}")
+    return results

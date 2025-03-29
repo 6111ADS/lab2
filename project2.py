@@ -49,7 +49,7 @@ def main():
     t = float(sys.argv[6])  
     q = sys.argv[7]  
     k = int(sys.argv[8])  
-    
+
     print(f"Parameters:\nClient key = {api_key}\nEngine key = {engine_id}\nGemini key = {gemini_key}")
     print(f"Method = {model}\nRelation = {r}\nThreshold = {t}\nQuery = {q}")
     print(f"# of Tuples = {k}")
@@ -80,15 +80,14 @@ def main():
                     print(f"        Trimming webpage content from {len(webpage_text)} to {len(trimmed_text)} characters")
                     print(f"        Webpage length (num characters): {len(trimmed_text)}")
                     sentences = extract_sentences_and_entities(trimmed_text)
-                    print(f"        I have read {len(sentences)} sentences")
 
                 try:
                     relations = extract_relations_with_gemini(sentences, r, gemini_key)
-                    for subj, obj, conf in relations:
+                    for subj, obj in relations:
                         if (subj, obj) not in seen_tuples:
                             seen_tuples.add((subj, obj))
                             final_ans.append((subj, obj))
-                            print(f"        Extracted Tuple: ({subj}, {obj}) with confidence {conf:.2f}")
+                            print(f"        Extracted Tuple: ({subj}, {obj})")
                 except Exception as e:
                     print(f"        Error extracting relations: {e}")
 
@@ -102,10 +101,10 @@ def main():
             else:
                 break
 
-        print("\nTop Relations:")
-        for subj, obj in final_ans[:k]:
-            print(f"\t({subj}, {obj})")
-
+        print(f"\t================== ALL RELATIONS for {RELATION_TYPES[r]} ( {len(final_ans)} ) =====================")
+        for subj, obj in final_ans:
+            print(f"Subject: {subj},      | Object: {obj}")
+        print(f"\tTotal # of iterations = {len(used_queries)}") 
 
     if model == "-spanbert":
         final_ans=dict()
