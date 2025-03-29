@@ -1,0 +1,185 @@
+Loading pre-trained spanBERT from ./pretrained_spanbert
+Parameters:
+Client key = AIzaSyAH3053gJAVQKa3bIl_E6lG_yj8xeS6fNI
+Engine key = 27b7234633e834677
+Gemini key = AIzaSyBCzRutWIyKtOHU7U9o0kSecLynt-8wLm0
+Method = -gemini
+Relation = 2
+Threshold = 0.7
+Query = bill gates microsoft
+# of Tuples = 10
+Loading necessary libraries; This should take a minute or so ...
+
+
+=========== Iteration: 0 - Query: bill gates microsoft ===========
+URL (1 / 10): {'URL': 'https://en.wikipedia.org/wiki/Bill_Gates'}
+        Trimming webpage content from 143420 to 10000 characters
+        Webpage length (num characters): 10000
+	Target relation type: per:employee_of
+	Extracted 75 sentences. Prompting Gemini on each sentence ...
+	Processed 1/75 sentences
+	=== Extracted Relation ===
+	Input Sentence: Bill Gates - Wikipedia Jump to content From Wikipedia, the free encyclopedia American businessman and philanthropist (born 1955)
+	Subject: Bill Gates | Object: Wikipedia
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is about the co-founder of Microsoft.
+	Subject: co-founder | Object: Microsoft
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is about the co-founder of Microsoft.
+	Subject: Microsoft | Object: co-founder
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: For other people with the same name, see Bill Gates (disambiguation) .
+	Subject: Bill Gates | Object: disambiguation
+	Adding to set of extracted relations
+
+	Processed 5/75 sentences
+	=== Extracted Relation ===
+	Input Sentence: Occupations Businessman philanthropist computer programmer writer Years active 1972–present Known for Pioneer of the personal computer revolution with Paul Allen Co-founding of Microsoft and Gates Foundation Title See list Chair of the Gates Foundation Chairman and founder of Cascade Investment Chairman and founder of Branded Entertainment Network Chairman and co-founder of TerraPower Founder of Breakthrough Energy Founder of Gates Ventures Technology advisor of Microsoft Spouse Melinda French ( m. 1994; div. 2021)
+	Subject: Gates Ventures | Object: Microsoft
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: Occupations Businessman philanthropist computer programmer writer Years active 1972–present Known for Pioneer of the personal computer revolution with Paul Allen Co-founding of Microsoft and Gates Foundation Title See list Chair of the Gates Foundation Chairman and founder of Cascade Investment Chairman and founder of Branded Entertainment Network Chairman and co-founder of TerraPower Founder of Breakthrough Energy Founder of Gates Ventures Technology advisor of Microsoft Spouse Melinda French ( m. 1994; div. 2021)
+	Subject: Microsoft | Object: Gates Ventures
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is part of a series about Bill Gates Personal Awards and honors Philanthropy Political positions Public image Residence Companies Traf-O-Data Microsoft history timeline criticism BENlabs Cascade Investment TerraPower Gates Ventures Charitable organizations Bill & Melinda Gates Foundation Match for Africa
+	Subject: Bill Gates | Object: Microsoft
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is part of a series about Bill Gates Personal Awards and honors Philanthropy Political positions Public image Residence Companies Traf-O-Data Microsoft history timeline criticism BENlabs Cascade Investment TerraPower Gates Ventures Charitable organizations Bill & Melinda Gates Foundation Match for Africa
+	Subject: Bill Gates | Object: Cascade Investment
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is part of a series about Bill Gates Personal Awards and honors Philanthropy Political positions Public image Residence Companies Traf-O-Data Microsoft history timeline criticism BENlabs Cascade Investment TerraPower Gates Ventures Charitable organizations Bill & Melinda Gates Foundation Match for Africa
+	Subject: Bill Gates | Object: TerraPower
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is part of a series about Bill Gates Personal Awards and honors Philanthropy Political positions Public image Residence Companies Traf-O-Data Microsoft history timeline criticism BENlabs Cascade Investment TerraPower Gates Ventures Charitable organizations Bill & Melinda Gates Foundation Match for Africa
+	Subject: Bill Gates | Object: Gates Ventures
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: This article is part of a series about Bill Gates Personal Awards and honors Philanthropy Political positions Public image Residence Companies Traf-O-Data Microsoft history timeline criticism BENlabs Cascade Investment TerraPower Gates Ventures Charitable organizations Bill & Melinda Gates Foundation Match for Africa
+	Subject: Bill Gates | Object: Bill & Melinda Gates Foundation
+	Adding to set of extracted relations
+
+	Processed 10/75 sentences
+	=== Extracted Relation ===
+	Input Sentence: The Giving Pledge OER Project Breakthrough Energy Mission Innovation Writings " An Open Letter to Hobbyists " The Road Ahead Business @ the Speed of Thought How to Avoid a Climate Disaster How to Prevent the Next Pandemic Related Bill Gates' flower fly Codex Leicester Lost on the Grand Banks Paul Allen v t e William Henry Gates III (born October 28, 1955) is an American businessman and philanthropist.
+	Subject: William Henry Gates III | Object: American
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: The Giving Pledge OER Project Breakthrough Energy Mission Innovation Writings " An Open Letter to Hobbyists " The Road Ahead Business @ the Speed of Thought How to Avoid a Climate Disaster How to Prevent the Next Pandemic Related Bill Gates' flower fly Codex Leicester Lost on the Grand Banks Paul Allen v t e William Henry Gates III (born October 28, 1955) is an American businessman and philanthropist.
+	Subject: American | Object: William Henry Gates III
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: A pioneer of the microcomputer revolution of the 1970s and 1980s, he co-founded the software company Microsoft in 1975 with his childhood friend Paul Allen .
+	Subject: Paul Allen | Object: Microsoft
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: A pioneer of the microcomputer revolution of the 1970s and 1980s, he co-founded the software company Microsoft in 1975 with his childhood friend Paul Allen .
+	Subject: Microsoft | Object: Paul Allen
+	Adding to set of extracted relations
+
+	Processed 15/75 sentences
+	=== Extracted Relation ===
+	Input Sentence: Born and raised in Seattle , Gates was educated at the private Lakeside School , where he befriended Allen.
+	Subject: Bill Gates | Object: Lakeside School
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: He enrolled at Harvard College in the fall of 1973 but dropped out after two years when he and Allen co-founded Microsoft.
+	Subject: He | Object: Harvard College
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: He enrolled at Harvard College in the fall of 1973 but dropped out after two years when he and Allen co-founded Microsoft.
+	Subject: He | Object: Microsoft
+	Adding to set of extracted relations
+
+	=== Extracted Relation ===
+	Input Sentence: He enrolled at Harvard College in the fall of 1973 but dropped out after two years when he and Allen co-founded Microsoft.
+	Subject: Allen | Object: Microsoft
+	Adding to set of extracted relations
+
+	Processed 20/75 sentences
+	Processed 25/75 sentences
+	Processed 30/75 sentences
+	Processed 35/75 sentences
+	Processed 40/75 sentences
+	Processed 45/75 sentences
+	Processed 50/75 sentences
+	Processed 55/75 sentences
+	Processed 60/75 sentences
+	Processed 65/75 sentences
+	Processed 70/75 sentences
+	Processed 75/75 sentences
+	Total relations extracted with Gemini: 19
+URL (2 / 10): {'URL': 'https://www.instagram.com/thisisbillgates/?hl=en'}
+        Trimming webpage content from 17 to 17 characters
+        Webpage length (num characters): 17
+	Target relation type: per:employee_of
+	Extracted 1 sentences. Prompting Gemini on each sentence ...
+	Processed 1/1 sentences
+	Total relations extracted with Gemini: 0
+URL (3 / 10): {'URL': 'https://x.com/billgates'}
+URL (4 / 10): {'URL': 'https://www.youtube.com/billgates'}
+        Trimming webpage content from 185 to 185 characters
+        Webpage length (num characters): 185
+	Target relation type: per:employee_of
+	Extracted 3 sentences. Prompting Gemini on each sentence ...
+	Processed 1/3 sentences
+	Total relations extracted with Gemini: 0
+URL (5 / 10): {'URL': 'https://news.microsoft.com/2020/03/13/microsoft-announces-change-to-its-board-of-directors/'}
+URL (6 / 10): {'URL': 'https://www.gatesnotes.com/'}
+URL (7 / 10): {'URL': 'https://www.linkedin.com/in/williamhgates'}
+URL (8 / 10): {'URL': 'https://news.microsoft.com/2006/06/15/microsoft-announces-plans-for-july-2008-transition-for-bill-gates/'}
+URL (9 / 10): {'URL': 'http://www.microsoft.com/'}
+        Trimming webpage content from 248 to 248 characters
+        Webpage length (num characters): 248
+	Target relation type: per:employee_of
+	Extracted 4 sentences. Prompting Gemini on each sentence ...
+	Processed 1/4 sentences
+	Total relations extracted with Gemini: 0
+URL (10 / 10): {'URL': 'https://answers.microsoft.com/en-us/windows/forum/all/a-short-letter-to-bill-gates/59fdd4d0-6330-40da-9e66-fa6c29836454'}
+        Trimming webpage content from 11 to 11 characters
+        Webpage length (num characters): 11
+	Target relation type: per:employee_of
+	Extracted 1 sentences. Prompting Gemini on each sentence ...
+	Processed 1/1 sentences
+	Total relations extracted with Gemini: 0
+	================== ALL RELATIONS for per:employee_of ( 19 ) =====================
+Subject: Bill Gates,      | Object: Wikipedia
+Subject: co-founder,      | Object: Microsoft
+Subject: Microsoft,      | Object: co-founder
+Subject: Bill Gates,      | Object: disambiguation
+Subject: Gates Ventures,      | Object: Microsoft
+Subject: Microsoft,      | Object: Gates Ventures
+Subject: Bill Gates,      | Object: Microsoft
+Subject: Bill Gates,      | Object: Cascade Investment
+Subject: Bill Gates,      | Object: TerraPower
+Subject: Bill Gates,      | Object: Gates Ventures
+Subject: Bill Gates,      | Object: Bill & Melinda Gates Foundation
+Subject: William Henry Gates III,      | Object: American
+Subject: American,      | Object: William Henry Gates III
+Subject: Paul Allen,      | Object: Microsoft
+Subject: Microsoft,      | Object: Paul Allen
+Subject: Bill Gates,      | Object: Lakeside School
+Subject: He,      | Object: Harvard College
+Subject: He,      | Object: Microsoft
+Subject: Allen,      | Object: Microsoft
+	Total # of iterations = 1
